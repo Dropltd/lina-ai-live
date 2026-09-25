@@ -26,4 +26,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python -m py_compile ai/brain.py
-          python -c "from ai.brain import LinaBrain; print(LinaBrain().create_prompt('Merhaba Lina'))"
+          python -c "from ai.brain import LinaBrain; print(LinaBrain().ask('Merhaba Lina, kendini kısaca tanit.'))"
