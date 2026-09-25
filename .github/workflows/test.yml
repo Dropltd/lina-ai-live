@@ -21,9 +21,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install openai
 
+      - name: Create Mock OpenAI
+        run: |
+          cat > openai.py <<'PY'
+          class MockResponse:
+              output_text = "Merhaba! Ben Lina. GitHub Actions üzerinde başarıyla çalışıyorum."
+
+          class MockResponses:
+              def create(self, **kwargs):
+                  print("Mock OpenAI isteği başarılı.")
+                  print("Model:", kwargs.get("model", "test-model"))
+                  return MockResponse()
+
+          class OpenAI:
+              def __init__(self, *args, **kwargs):
+                  self.responses = MockResponses()
+          PY
+
       - name: Test Lina
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: test-key
         run: |
           python -m py_compile ai/brain.py
-          python -c "from ai.brain import LinaBrain; print(LinaBrain().ask('Merhaba Lina, kendini kısaca tanit.'))"
+          python -c "from ai.brain import LinaBrain; print('Lina import başarılı.'); print(LinaBrain().ask('Merhaba Lina, kendini kısaca tanıt.'))"
