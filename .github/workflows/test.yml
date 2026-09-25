@@ -19,28 +19,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install openai
-
-      - name: Create Mock OpenAI
-        run: |
-          cat > openai.py <<'PY'
-          class MockResponse:
-              output_text = "Merhaba! Ben Lina. GitHub Actions üzerinde başarıyla çalışıyorum."
-
-          class MockResponses:
-              def create(self, **kwargs):
-                  print("Mock OpenAI isteği başarılı.")
-                  print("Model:", kwargs.get("model", "test-model"))
-                  return MockResponse()
-
-          class OpenAI:
-              def __init__(self, *args, **kwargs):
-                  self.responses = MockResponses()
-          PY
+          pip install google-genai
 
       - name: Test Lina
         env:
-          OPENAI_API_KEY: test-key
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python -m py_compile ai/brain.py
-          python -c "from ai.brain import LinaBrain; print('Lina import başarılı.'); print(LinaBrain().ask('Merhaba Lina, kendini kısaca tanıt.'))"
+          python ai/brain.py
