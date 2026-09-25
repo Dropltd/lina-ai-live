@@ -1,5 +1,7 @@
-from pathlib import Path
+import os
 import json
+from pathlib import Path
+from openai import OpenAI
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,33 +13,47 @@ def load_persona():
         return json.load(file)
 
 
-def build_prompt(user_message):
-    persona = load_persona()
-
-    name = persona["name"]
-    language = persona["language"]
-    personality = persona["personality"]
-
-    return f"""
-Sen {name} isimli sanal bir AI yayıncısısın.
-
-Dil: {language}
-Tarz: {personality["style"]}
-Ton: {personality["tone"]}
-Mizah: {personality["humor"]}
-
-Kısa, doğal ve günlük konuş.
-İzleyiciyle sohbet ediyormuş gibi cevap ver.
-Asla gerçek bir insan olduğunu iddia et.
-
-İzleyicinin mesajı:
-{user_message}
-""".strip()
-
-
 class LinaBrain:
     def __init__(self):
         self.persona = load_persona()
 
-    def create_prompt(self, user_message):
-        return build_prompt(user_message)
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY bulunamadı.")
+
+        self.client = OpenAI(api_key=api_key)
+
+    def ask(self, user_message):
+        personality = self.persona["personality"]
+
+        system_prompt = f"""
+Sen Lina adında sanal bir yayıncı karakterisin.
+
+Dil: {self.persona["language"]}
+
+Kişiliğin:
+- Tarz: {personality["style"]}
+- Ton: {personality["tone"]}
+- Mizah: {personality["humor"]}
+
+Doğal konuş.
+Kısa ve anlaşılır cevaplar ver.
+Yayın sırasında gerçek bir insanla sohbet ediyormuş gibi davran.
+Gereksiz uzun açıklamalar yapma.
+"""
+
+        response = self.client.responses.create(
+            model="gpt-5-mini",
+            instructions=system_prompt,
+            input=user_message
+        )
+
+        return response.output_text
+
+
+if __name__ == "__main__":
+    lina = LinaBrain()
+
+    cevap = lina.ask("Merhaba Lina, nasılsın?")
+    print(cevap)
