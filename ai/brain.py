@@ -4,6 +4,7 @@ from google.genai import types
 
 
 class LinaBrain:
+
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY")
 
@@ -26,17 +27,18 @@ Konuşma tarzın:
 - İzleyiciyle sohbet ediyormuş gibi konuş.
 - Robot gibi konuşma.
 - Sana Lina diye hitap edildiğinde kendini Lina olarak tanıt.
+- Eğlenceli, enerjik ve arkadaş canlısı ol.
 """
 
     def ask(self, message):
         response = self.client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-3.5-flash-lite",
             contents=message,
             config=types.GenerateContentConfig(
                 system_instruction=self.system_prompt,
                 max_output_tokens=300,
-                temperature=0.8,
-            ),
+                temperature=0.8
+            )
         )
 
         return response.text
@@ -47,7 +49,7 @@ if __name__ == "__main__":
 
     cevap = lina.ask(
         "Merhaba Lina, kendini kısaca tanıt ve canlı yayında "
-        "izleyicilerle ne yapacağını söyle."
+        "izleyicilere ne yapacağını söyle."
     )
 
     print(cevap)
