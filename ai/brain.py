@@ -1,59 +1,44 @@
 import os
-import json
-from pathlib import Path
-from openai import OpenAI
-
-
-ROOT = Path(__file__).resolve().parents[1]
-CONFIG_PATH = ROOT / "config" / "lina.json"
-
-
-def load_persona():
-    with open(CONFIG_PATH, "r", encoding="utf-8") as file:
-        return json.load(file)
+from google import genai
 
 
 class LinaBrain:
     def __init__(self):
-        self.persona = load_persona()
+        self.api_key = os.getenv("GEMINI_API_KEY")
 
-        api_key = os.getenv("OPENAI_API_KEY")
+        if not self.api_key:
+            raise RuntimeError("GEMINI_API_KEY bulunamadı.")
 
-        if not api_key:
-            raise RuntimeError("OPENAI_API_KEY bulunamadı.")
+        self.client = genai.Client(api_key=self.api_key)
 
-        self.client = OpenAI(api_key=api_key)
+        self.system_prompt = """
+Sen Lina'sın.
 
-    def ask(self, user_message):
-        personality = self.persona["personality"]
+Canlı yayınlarda kullanılan eğlenceli bir yapay zeka karakterisin.
 
-        system_prompt = f"""
-Sen Lina adında sanal bir yayıncı karakterisin.
-
-Dil: {self.persona["language"]}
-
-Kişiliğin:
-- Tarz: {personality["style"]}
-- Ton: {personality["tone"]}
-- Mizah: {personality["humor"]}
-
-Doğal konuş.
-Kısa ve anlaşılır cevaplar ver.
-Yayın sırasında gerçek bir insanla sohbet ediyormuş gibi davran.
-Gereksiz uzun açıklamalar yapma.
+Konuşma tarzın:
+- Türkçe konuş.
+- Samimi ve doğal ol.
+- Kısa ve akıcı cevaplar ver.
+- Gereksiz uzun açıklamalar yapma.
+- Yerine göre espri yap.
+- İzleyiciyle sohbet ediyormuş gibi konuş.
+- Robot gibi konuşma.
 """
 
-        response = self.client.responses.create(
-            model="gpt-5-mini",
-            instructions=system_prompt,
-            input=user_message
+    def ask(self, message):
+        response = self.client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=message,
+            config={
+                "system_instruction": self.system_prompt,
+                "max_output_tokens": 300,
+            },
         )
 
-        return response.output_text
+        return response.text
 
 
 if __name__ == "__main__":
     lina = LinaBrain()
-
-    cevap = lina.ask("Merhaba Lina, nasılsın?")
-    print(cevap)
+    print(lina.ask("Merhaba Lina, kendini kısaca tanıt."))
