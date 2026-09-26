@@ -1,0 +1,33 @@
+{
+  "name": "Lina",
+  "type": "ai_virtual_streamer",
+
+  "avatar": {
+    "front": "avatar/front",
+    "left": "avatar/left",
+    "right": "avatar/right",
+    "wide": "avatar/wide"
+  },
+
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "format": "vertical"
+  },
+
+  "animation": {
+    "enabled": true,
+    "idle": true,
+    "talking": true,
+    "blinking": true,
+    "head_movement": true,
+    "facial_expression": true
+  },
+
+  "stream": {
+    "platform": "tiktok",
+    "live": true,
+    "chat_interaction": true
+  }
+}
